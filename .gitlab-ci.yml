@@ -1,0 +1,67 @@
+stages:
+  - lint
+  - build
+  - test
+
+# Frontend jobs
+frontend-lint:
+  stage: lint
+  script:
+    - cd frontend
+    - pnpm install
+    - pnpm run lint
+  only:
+    - main
+    - merge_requests
+
+backend-lint:
+  stage: lint
+  script:
+    - cd backend
+    - dotnet format --verify-no-changes
+  only:
+    - main
+    - merge_requests
+
+frontend-build:
+  stage: build
+  script:
+    - cd frontend
+    - pnpm install
+    - pnpm run build
+  needs: ["frontend-lint"]
+  only:
+    - main
+    - merge_requests
+
+backend-build:
+  stage: build
+  script:
+    - cd backend
+    - dotnet restore
+    - dotnet build
+  needs: ["backend-lint"]
+  only:
+    - main
+    - merge_requests
+
+frontend-test:
+  stage: test
+  script:
+    - cd frontend
+    - pnpm install
+    - pnpm run test
+  needs: ["frontend-build"]
+  only:
+    - main
+    - merge_requests
+
+backend-test:
+  stage: test
+  script:
+    - cd backend
+    - dotnet test
+  needs: ["backend-build"]
+  only:
+    - main
+    - merge_requests
