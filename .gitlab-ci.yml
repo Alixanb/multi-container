@@ -16,6 +16,7 @@ frontend-lint:
 
 backend-lint:
   stage: lint
+  image: mcr.microsoft.com/dotnet/sdk:9.0
   script:
     - cd backend
     - dotnet format --verify-no-changes
