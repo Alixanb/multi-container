@@ -12,7 +12,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:8081")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -21,6 +21,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors();
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -28,8 +29,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
-app.UseHttpsRedirection();
 
 var summaries = new[]
 {

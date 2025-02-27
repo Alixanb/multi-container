@@ -6,13 +6,14 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class MessageController : ControllerBase, IDisposable
+    public class MessageController : ControllerBase
     {
-        private readonly NpgsqlConnection _connection;
+        private readonly string _connectionString;
 
         public MessageController(IConfiguration configuration)
         {
-            _connection = new NpgsqlConnection(configuration.GetConnectionString("Default"));
+            _connectionString = configuration.GetConnectionString("Default") 
+                ?? throw new InvalidOperationException("Connection string 'Default' not found.");
         }
 
         [HttpGet]
@@ -20,20 +21,18 @@ namespace backend.Controllers
         {
             try
             {
-                await _connection.OpenAsync();
-                using var command = new NpgsqlCommand("SELECT message FROM messages LIMIT 1", _connection);
+                await using var connection = new NpgsqlConnection(_connectionString);
+                await connection.OpenAsync();
+                
+                await using var command = new NpgsqlCommand("SELECT message FROM messages LIMIT 1", connection);
                 var message = await command.ExecuteScalarAsync();
-                return Ok(new { message = message ?? "Hello from Database!" });
+                
+                return Ok(new { message = message?.ToString() ?? "Hello from Database!" });
             }
-            finally
+            catch (Exception ex)
             {
-                await _connection.CloseAsync();
+                return StatusCode(500, new { error = "Database connection failed", details = ex.Message });
             }
-        }
-
-        public void Dispose()
-        {
-            _connection?.Dispose();
         }
     }
 }

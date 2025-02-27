@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS messages (
     message TEXT NOT NULL
 );
 
-INSERT INTO messages (message) VALUES ('Hello from PostgreSQL!'); 
+INSERT INTO messages (message) VALUES ('Hello from PostgresSQL!'); 
